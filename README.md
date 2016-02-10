@@ -4,7 +4,7 @@ Notifies if there's a new opening on that company you want to keep your eye on
 
 ### Installation
 
-You should have node installed, head over to node's (website)[https://nodejs.org/en/] if you don't have it
+You should have node installed, head over to node's [website](https://nodejs.org/en/) if you don't have it
 
 Run the following:
 `$ npm install`
