@@ -3,18 +3,30 @@
     "company": "iFood",
     "domain": "http://www.vagas.com.br",
     "path": "/vagas-de-ifood-em-campinas",
-    "selectors": [
-      ".cargo a",
-      ""
-    ]
+    "selectors": {
+      "container": ".cargo",
+      "link": "a",
+      "title": ""
+    }
   },
   {
     "company": "Service Rocket",
     "domain": "http://company.servicerocket.com",
     "path": "/careers/current-opportunities/",
-    "selectors":[
-      ".responsive-tabs div:nth-child(8) a",
-      "strong"
-    ]
+    "selectors":{
+      "container": ".responsive-tabs div:eq(3) .careers-hd",
+      "link": "a",
+      "title": "strong"
+    }
+  },
+  {
+    "company": "Crossover",
+    "domain": "http://www.crossover.com",
+    "path": "/portfolio/software-developer-and-engineering/",
+    "selectors": {
+      "container": ".tab_block p",
+      "link": "a",
+      "title": "strong"
+    }
   }
 ]

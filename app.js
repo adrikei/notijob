@@ -2,23 +2,22 @@
 var notifier = require('node-notifier')
 var http = require('http')
 var fs = require('fs')
-var cheerio = require('cheerio')
+var jquery = require('jquery')
 var marked = require('marked')
+var jsdom = require('jsdom')
 
 /*input*/
 var input = require('./input.json')
-var lastNotified = require('./file.json')
 
 /*var*/
-function markdownOpenings(openings){
+function markdown(openingMap){
   var markedDown = ''
-  var lastDomain = ''
-  openings.forEach((opening, index, arr)=>{
-    if(opening.domain !== lastDomain){
-      markedDown += marked('# ' + opening.company)
-      lastDomain = opening.domain
-    }
-    markedDown += marked('#### ['+opening.description+'](' + opening.link + ')')
+  Object.keys(openingMap).forEach((key)=>{
+    var openings = openingMap[key]
+    markedDown += marked(`# ${key}`)
+    openings.forEach((opening) => {
+      markedDown += marked(`#### [${opening.description}](${opening.link})`)
+    })
   })
   return markedDown
 }
@@ -28,70 +27,54 @@ function notify(fileName){
     title: 'New Openings are available',
     message: 'Click to check them out!',
     open: 'file://' + __dirname + '/' + fileName
-    //'wait': true
   })
 }
 
-function listOpenings(company, source){
-  var $ = cheerio.load(source)
-  var data = []
-  var pai = company.selectors[0]
-  var filho = company.selectors[1]
+function listOpenings(input, callback){
+  var data = {}
 
-  $(pai).each((i, vlr)=>{
-    var description
-    if(filho){
-      description = $(vlr).find(filho).text()
-    }else{
-      description = $(vlr).text()
-    }
-    description = description.replace( /[\s\s+|\n]/g, ' ' )
-    // console.log(description)
-    var link = $(vlr).attr('href')
-    if(description){
-      data.push({})
-      data[data.length-1].company = company.company
-      data[data.length-1].domain = company.domain;
-      data[data.length-1].description = description
-      if(link.indexOf('http://') === -1){
-        link = company.domain + link;
-      }
-      data[data.length-1].link = link
-    }
-  })
-  return data
-}
+  input.forEach((company, index) => {
+    jsdom.env(company.domain + company.path, (err, window) => {
+      var $ = jquery(window)
 
-function checkForOpenings(input, previousVersion){
-  var markedHtml = ''
-  var sitesCount = input.length
-  input.forEach((company, index, arr)=>{
-    var pageSource = ''
-    //console.log('Checking url:', company.domain + company.path)
-    http.get(company.domain + company.path, (res)=>{
-      res.setEncoding('utf8');
-      res.on('data', (chunk)=>{
-        pageSource += chunk
-      })
-      res.on('end', ()=>{
-        var openings = listOpenings(company, pageSource)
-        markedHtml += markdownOpenings(openings)
-        sitesCount--
-        if(sitesCount === 0){
-          if(markedHtml !== previousVersion){
-            fs.writeFile('./openings.html', markedHtml)
-            notify('openings.html')
-          }else{
-            console.log('No new openings found')
+      var container = company.selectors.container
+      var title = company.selectors.title
+      var link = company.selectors.link
+
+      $(container).each((i, vlr) => {
+        var desc = $(`${container}:eq(${i}) ${title}`).text().replace(/[\s\s+|\n]/g, ' ')
+        var href = $(`${container}:eq(${i}) ${link}`).attr('href')
+
+        if(desc && href){
+          data[company.company] = data[company.company] || []
+          if(href.indexOf('http://') === -1){
+            href = company.domain + href;
           }
+          data[company.company].push({description: desc, link: href})
         }
+
       })
-    }).on('error', (e)=>{})
+      window.close()
+      if(company === input[input.length-1]){
+        //console.log(data)
+        callback(data)
+      }
+    })
   })
 }
-fs.readFile('./openings.html', 'utf8', (err, data) => {
-  if(!err){
-    var previousVersion = data
-    checkForOpenings(input, previousVersion)
-  }
+
+listOpenings(input, (data) => {
+  var markedHtml = markdown(data)
+  fs.readFile('./openings.html', 'utf8', (err, previousVersion) => {
+    if(!err || err.code === 'ENOENT'){
+      if(markedHtml !== previousVersion){
+        fs.writeFile('./openings.html', markedHtml)
+        notify('openings.html')
+      }else{
+        console.log('No new openings found')
+      }
+    }else{
+      console.log(err)
+    }
+  })
 })
