@@ -16,7 +16,7 @@ time is the amount of time in which you want the script to look for openings, in
 ### Configuration
 
 Edit the `input.json` file. I hope company, domain and path attributes are self-explanatory.
-selectors should be an object with a 'container', 'title' and 'link' css-selectors for the elements that will provide the information for the opening.
+selectors should be an object with a 'container', 'title' and 'link' css-selectors for the elements that will provide the information for the opening. 'title' and 'link' selectors should be children of 'container' selector.
 
 ### Output
 
