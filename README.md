@@ -9,9 +9,9 @@ You should have node installed, head over to node's [website](https://nodejs.org
 Run the following:
 `$ npm install`
 
-And you're good to go. `$ node app` to run it!
-
-As of this latest commit, it still doesn't keep looking for them openings, in the future, it will look for openings every x amount of time
+And you're good to go. `$ node app <time>` to run it!
+time is the amount of time in which you want the script to look for openings, in minutes
+`$ node app 60` will make it check for openings every 60 minutes.
 
 ### Configuration
 
@@ -20,4 +20,4 @@ selectors should be an object with a 'container', 'title' and 'link' css-selecto
 
 ### Output
 
-Will produce a markup styled html and trigger a system notification to claim your attention ~when any opening change~ if current openings are different from the last ones that showed up on last execution.
+Will produce a markup styled html and trigger a system notification to claim your attention ~~when any opening change~~ if current openings are different from the last ones that showed up on last execution.

@@ -63,18 +63,26 @@ function listOpenings(input, callback){
   })
 }
 
-listOpenings(input, (data) => {
-  var markedHtml = markdown(data)
-  fs.readFile('./openings.html', 'utf8', (err, previousVersion) => {
-    if(!err || err.code === 'ENOENT'){
-      if(markedHtml !== previousVersion){
-        fs.writeFile('./openings.html', markedHtml)
-        notify('openings.html')
-      }else{
-        console.log('No new openings found')
-      }
-    }else{
-      console.log(err)
-    }
-  })
-})
+var time = parseInt(process.argv[2]);
+
+if(time && time < 60){
+  setInterval(() => {
+    listOpenings(input, (data) => {
+      var markedHtml = markdown(data)
+      fs.readFile('./openings.html', 'utf8', (err, previousVersion) => {
+        if(!err || err.code === 'ENOENT'){
+          if(markedHtml !== previousVersion){
+            fs.writeFile('./openings.html', markedHtml)
+            notify('openings.html')
+          }else{
+            console.log('No new openings found')
+          }
+        }else{
+          console.log(err)
+        }
+      })
+    })
+  }, 1000 * 60 * time);
+}else{
+  console.log('usage: $ node app <time>')
+}
