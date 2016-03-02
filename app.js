@@ -65,7 +65,7 @@ function listOpenings(input, callback){
 
 var time = parseInt(process.argv[2]);
 
-if(time && time < 60){
+if(time && time <= 60){
   setInterval(() => {
     listOpenings(input, (data) => {
       var markedHtml = markdown(data)
